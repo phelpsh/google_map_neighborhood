@@ -1,0 +1,21 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+
+- url: /templates
+  static_dir: /templates
+
+- url: /css
+  static_dir: css
+
+- url: /js
+  static_dir: js
+
+- url: /.*
+  script: Neighborhood.app
+
+libraries:
+- name: jinja2
+  version: latest
