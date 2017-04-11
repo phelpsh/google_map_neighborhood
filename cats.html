@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Heather Phelps Cats List Project</title>
+    <!-- JQuery js -->
+    <script src="/js/jquery-3.1.1.js"></script>
+    <!-- Latest compiled and minified CSS -->
+    <link type="text/css" rel="stylesheet" href="/css/bootstrap.min.css">
+	<script src="/js/knockout-3.4.2.js"></script>
+	<!-- custom js -->
+	<script src="/js/neighborhoodmap.js"></script>
+	<script src="/js/style.js"></script>
+	<link type="text/css" rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<main class="container-fluid set-max">
+	<div class="row">
+
+		<div class="list-group col-sm-3">
+			<div class="list-header"><h1>Landmarks</h1></div>
+
+			<form>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search" data-bind="value: searchItem">
+                <div class="input-group-btn">
+                  <button data-bind="click: doFilter">Search</button>
+                    <!--i class="glyphicon glyphicon-search"></i-->
+                  </button>
+                </div>
+              </div>
+            </form>
+
+    		<div class="list container" id="list">
+       
+                <div class="list-group" data-bind="foreach: items">
+                    <a href="#" class="list-group-item">
+                      <h5 class="list-group-item-heading" data-bind="text: name"></h5>
+                      <h6 class="list-group-item-text" data-bind="text: address"></h6>
+                    </a>
+                </div>
+
+            </div>
+
+            
+
+		</div>
+
+		<div class="map-big col-sm-9">
+			<div id="map">cat pic</div>
+		</div>
+
+	</div>
+</main>
+
+
+<script type="text/javascript">
+
+		
+  // 		var json = $.getJSON("/js/dc_landmarks.json", function() {
+  //           for (var i = 0; i < 100; i++) {
+
+  //               var listitem = "<div class='list-div'>" + "<p class='list-item-name'>" + json.responseJSON.features[i].properties.Name + "</p>" + "<p class='list-item'>" + json.responseJSON.features[i].properties.ADDRESS + "</p>" + "</div>"
+
+  //               $("#list").append(listitem)
+
+  //           }
+
+		// });
+
+	
+</script>
+</body>
+
+</html>

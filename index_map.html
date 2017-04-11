@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Heather Phelps Neighborhood Map Project</title>
+    <!-- JQuery js -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!-- ko js 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js"></script-->
+	<script src="js/knockout-3.4.2.js"></script>
+	<!-- custom js -->
+	<script src="js/neighborhoodmap.js"></script>
+	<script src="js/style.js"></script>
+	<link type="text/css" rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<main class="container-fluid set-max">
+	<div class="row">
+
+		<div class="list-group col-sm-3">
+			<div class="list-header"><h1>Landmarks</h1></div>
+			<div class="filter-box">
+				<form>
+					<input type="text" name="filter">
+					<input type="submit">
+				</form>
+
+			</div>
+			<div class="list">actual list</div>
+
+		</div>
+
+		<div class="map-big col-sm-9">
+			<div id="map">map</div>
+		</div>
+
+	</div>
+</main>
+
+
+<script type="text/javascript">
+
+	var markers = [];
+
+	function initMap() {
+//create style array
+		var styles = getStyleArray()
+
+        // Create a map object and specify the DOM element for display.
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 38.891248, lng: -77.036551},
+          zoom: 11, 
+          styles: styles
+        });
+
+        var locations = [
+			{title: "4628 48th Street, NW", location: {lng: -77.09459219793168, lat: 38.95065369387358}},
+        	{title: "Adams Memorial", location: {lat: 38.94738109070402, lng: -77.01033347158629}}
+        ];
+
+        var largeInfoWindow = new google.maps.InfoWindow();
+        var defaultIcon = makeMarkerIcon("E60000");
+		var highlightedIcon = makeMarkerIcon("FFB3B3");
+
+        var bounds = new google.maps.LatLngBounds();
+        
+        for  (var i=0; i < locations.length; i++) {
+        	var position = locations[i].location;
+        	var title = locations[i].title;
+        	//create a marker per location, and put into markers array
+        	var marker = new google.maps.Marker({
+        		map: map,
+        		position: position,
+        		title: title,
+        		animation: google.maps.Animation.DROP,
+        		icon: defaultIcon,
+        		id: i
+        	})
+        	markers.push(marker);
+        	bounds.extend(marker.position);
+        	//onclick event for each
+        	marker.addListener('click', function(){
+        		populateInfoWindow(this, largeInfoWindow);
+        	});
+        	// Two event listeners - one for mouseover, one for mouseout,
+			// to change the colors back and forth.
+			marker.addListener('mouseover', function() {
+				this.setIcon(highlightedIcon);
+			});
+
+			marker.addListener('mouseout', function() {
+				this.setIcon(defaultIcon);
+			});
+        }
+
+        map.fitBounds(bounds);
+
+        function populateInfoWindow(marker, infowindow) {
+        	//check to make sure not already open
+        	if (infowindow.marker != marker) {
+        		infowindow.marker = marker;
+        		infowindow.setContent('<div>' + marker.title + '</div>');
+        		infowindow.open(map, marker);
+        	}
+        }
+
+		
+
+        //"Adams Memorial"
+        // var landmark = {lat: 38.94738109070402, lng: -77.01033347158629}
+        // var marker = new google.maps.Marker({
+        // 	position: landmark,
+        // 	map: map,
+        // 	title: "Adams Memorial"
+        // });
+
+        // var infowindow = new google.maps.InfoWindow({
+        // 	content: "Name: Adams Memorial Rock Creek Church Rd & Webster St, NW"
+        // });
+
+        // marker.addListener('click', function() {
+        // 	infowindow.open(map, marker);
+        // });
+
+  		var json = $.getJSON("js/dc_landmarks.json", function() {
+  			console.log(json);
+		});
+  		
+    }
+
+	// This function takes in a COLOR, and then creates a new marker
+	// icon of that color. The icon will be 21 px wide by 34 high, have an origin
+	// of 0, 0 and be anchored at 10, 34).
+	function makeMarkerIcon(markerColor) {
+		var markerImage = new google.maps.MarkerImage(
+		'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+		'|40|_|%E2%80%A2',
+		new google.maps.Size(21, 34),
+		new google.maps.Point(0, 0),
+		new google.maps.Point(10, 34),
+		new google.maps.Size(21,34));
+		return markerImage;
+	}
+
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBXcgHyvjUBGyfoyiNqTTw94-CgbAFypRg&callback=initMap"
+async defer>
+	
+</script>
+</body>
+
+</html>
