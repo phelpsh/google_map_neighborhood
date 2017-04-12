@@ -60,6 +60,82 @@ var mapList = () //video 30
 
 // }
 
+//initial start for map
+function initMap() {
+//create style array
+	console.log("callback initiating"); //works!
+	var styles = getStyleArray()
+
+	// Create a map object and specify the DOM element for display.
+	var map = new google.maps.Map(document.getElementById('map'), {
+		center: {lat: 38.891248, lng: -77.036551},
+		zoom: 11, 
+		styles: styles
+	});
+
+}
+
+function makeMarkerIcon(markerColor) {
+	var markerImage = new google.maps.MarkerImage(
+	'http://chart.googleapis.com/chart?chst=d_map_spin&chld=1.15|0|'+ markerColor +
+	'|40|_|%E2%80%A2',
+	new google.maps.Size(21, 34),
+	new google.maps.Point(0, 0),
+	new google.maps.Point(10, 34),
+	new google.maps.Size(21,34));
+	return markerImage;
+}
+
+
+function refreshMap(positions) {
+	// console.log(positions[0].title); // works!
+	var locations = positions
+	var bounds = new google.maps.LatLngBounds();
+	var largeInfoWindow = new google.maps.InfoWindow();
+    var defaultIcon = makeMarkerIcon("E60000");
+	var highlightedIcon = makeMarkerIcon("FFB3B3");
+	for  (var i=0; i < locations.length; i++) {
+		var position = locations[i].location;
+		var title = locations[i].title;
+		//create a marker per location, and put into markers array
+		var marker = new google.maps.Marker({
+			map: map,
+			position: position,
+			title: title,
+			animation: google.maps.Animation.DROP,
+			icon: defaultIcon,
+			id: i
+		})
+		markers.push(marker);
+		bounds.extend(marker.position);
+		//onclick event for each
+		marker.addListener('click', function(){
+			populateInfoWindow(this, largeInfoWindow);
+		});
+		// Two event listeners - one for mouseover, one for mouseout,
+		// to change the colors back and forth.
+		marker.addListener('mouseover', function() {
+			this.setIcon(highlightedIcon);
+		});
+
+		marker.addListener('mouseout', function() {
+			this.setIcon(defaultIcon);
+		});
+	} // end for loop
+
+	map.fitBounds(bounds);
+
+} // end function
+
+function populateInfoWindow(marker, infowindow) {
+	//check to make sure not already open
+	if (infowindow.marker != marker) {
+		infowindow.marker = marker;
+		infowindow.setContent('<div>' + marker.title + '</div>');
+		infowindow.open(map, marker);
+	}
+}
+
 // Class to represent a list item 
 function landmarkItem(name, address, lat, lng) {
     var self = this;
@@ -70,86 +146,77 @@ function landmarkItem(name, address, lat, lng) {
     return self;
 }
 
+function markerItem(name, lat, lng) {
+    var self = this;
+    self.title = name;
+    self.location = {lng: lng, lat: lat};
+    return self;
+}
+
 var json = $.getJSON("/js/dc_landmarks.json", function() {
 	var items = [];
+	var positions = []
 	//populate everything for the list of landmarks
     for (var i = 0; i < 20; i++) {
 		name = json.responseJSON.features[i].properties.Name;
         address = json.responseJSON.features[i].properties.ADDRESS;
         lat = json.responseJSON.features[i].geometry.coordinates[0][1];
         lng = json.responseJSON.features[i].geometry.coordinates[0][0];
+        // list of items for list
         item = new landmarkItem(name, address, lat, lng);
         items.push(item);
+        //set the initial map with all the features as markers
+        position = new markerItem(name, lat, lng);
+        positions.push(position);  
     }
+    //set the initial map with all the features as markers
+    refreshMap(positions); 
+
     //create new LandmarkViewModel with the list
     ko.applyBindings(new LandmarkViewModel(items));
-});
+}); //end json and initialize section
 
 var LandmarkViewModel = function(items) {
 	self = this;
     self.items = ko.observableArray(items);
     self.searchItem = ko.observable();
-    //self.currentFilter = ko.observable(); //to store the filter
-	//self.currentFilter(self.searchItem); 
-    
-    //populate markers TODO
-    for (var i = 0; i < 2; i++) {
-    	alert(items[i].lat); //returns object object
-    	//TODO: take into account filter
-    }
-
     self.doFilter = function() {
         var filter = self.searchItem();        // Read the current value
         if(!filter) {
-        	alert("filter is empty");
+        	alert("Please enter a search term.");
         } else {
-			//filter the items
-        	alert("filter is full")
-        }
-    };
-
-};
-
-
-//data-bind="click: doFilter"
-//data-bind="value: searchItem"
-
-
-    // self.searchLandmarks = ko.computed(function() {
-    //     if (!self.currentFilter()) {
-    //         return self.items();
-    //     } else {
-    //         return ko.utils.arrayFilter(self.items(), function (item) {
-    //             return item.name == self.currentFilter();
-    //         });
-    //     }
-    // });
-    // 	var filter = this.searchItem;//.toLowerCase();
-    //     if (filter) {
-    //     	return ko.utils.arrayFilter(this.items, function(item) {
-    //         	return ko.utils.stringStartsWith(item.name().toLowerCase(), filter);
-    //     	});
-    //     } else {
-    //      	return this.items;
-    //     }
-			// //go through list of items and only show those with searchItem present
-			// ko.computed(function() {
-			// 	return this.fil
-			// 	})
-			// }
-   //      }
-            
-            //this.searchItem(""); // Clears the text box
-            //iterate through items and filter? heather - here
-        
-    //}).bind(this);  // Ensure that "this" is always this view model
+        	filteredItems = [];
+        	var n = false;
+        	for (var i = 0; i < items.length; i++) {
+		    	n = items[i].name.includes(filter);
+		    	//TODO: make case-independent (now "Am" returns American but not "am")
+		    	if (n) {
+		    		filteredItems.push(items[i]);
+		    	}  // end if
+		    }  // end for loop
+		    if (!filteredItems.length == 0) {
+        		self.items(filteredItems); //set the new data in items bind
+        		// make new marker set with filteredItems
+        		var locations = [];
+        		for (var i = 0; i < filteredItems.length; i++) {
+        			var mkr = self.makeMarker(filteredItems[i].name, 
+        				  					  filteredItems[i].lat, 
+        				  			          filteredItems[i].lng);
+        			locations.push(mkr);
+        		}
+        		// refresh the map to show new markers
+        		refreshMap(locations)
+		    } else {
+		    	alert("That search term did not return any results.");
+		    }
 
 
+        }  // end else 
+    };  // end of doFilter function
 
+    self.makeMarker = function(name, lat, lng) {
+    	var mkr = {title: name, location: {lng: lng, lat: lat}};
+    	return mkr;
+    }  //end makeMarker function
 
-
-
-
-
-
-
+};  // end of model
