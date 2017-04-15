@@ -60,19 +60,66 @@ var mapList = () //video 30
 
 // }
 
+//global variables to manage map and markers
+var map;
+var markers = [];
+
 //initial start for map
 function initMap() {
 //create style array
-	console.log("callback initiating"); //works!
+
 	var styles = getStyleArray()
 
 	// Create a map object and specify the DOM element for display.
-	var map = new google.maps.Map(document.getElementById('map'), {
-		center: {lat: 38.891248, lng: -77.036551},
-		zoom: 11, 
+	map = new google.maps.Map(document.getElementById('map'), {
 		styles: styles
 	});
 
+	map.setCenter({lat: 38.891248, lng: -77.036551});
+	map.setZoom(11);
+	
+	// now set the initial markers
+	if (markers.length != 0) {
+		
+		var largeInfoWindow = new google.maps.InfoWindow();
+        var defaultIcon = makeMarkerIcon("E60000");
+		var highlightedIcon = makeMarkerIcon("FFB3B3");
+
+        var bounds = new google.maps.LatLngBounds();
+
+		for  (var i=0; i < markers.length; i++) {
+        	var position = markers[i].location;
+        	var title = markers[i].title;
+        	//create a marker per location, and put into markers array
+        	var marker = new google.maps.Marker({
+        		map: map,
+        		position: position,
+        		title: title,
+        		animation: google.maps.Animation.DROP,
+        		icon: defaultIcon,
+        		id: i
+        	})
+        	//shit using this twice??? HOOCH
+        	//markers.push(marker);
+        	bounds.extend(marker.position);
+        	//onclick event for each
+        	marker.addListener('click', function(){
+        		populateInfoWindow(this, largeInfoWindow);
+        	});
+        	// Two event listeners - one for mouseover, one for mouseout,
+			// to change the colors back and forth.
+			marker.addListener('mouseover', function() {
+				this.setIcon(highlightedIcon);
+			});
+
+			marker.addListener('mouseout', function() {
+				this.setIcon(defaultIcon);
+			});
+        } // marker creation for loop
+        map.fitBounds(bounds);
+	} //end if to check markers exist
+	
+	
 }
 
 function makeMarkerIcon(markerColor) {
@@ -85,47 +132,6 @@ function makeMarkerIcon(markerColor) {
 	new google.maps.Size(21,34));
 	return markerImage;
 }
-
-
-function refreshMap(positions) {
-	// console.log(positions[0].title); // works!
-	var locations = positions
-	var bounds = new google.maps.LatLngBounds();
-	var largeInfoWindow = new google.maps.InfoWindow();
-    var defaultIcon = makeMarkerIcon("E60000");
-	var highlightedIcon = makeMarkerIcon("FFB3B3");
-	for  (var i=0; i < locations.length; i++) {
-		var position = locations[i].location;
-		var title = locations[i].title;
-		//create a marker per location, and put into markers array
-		var marker = new google.maps.Marker({
-			map: map,
-			position: position,
-			title: title,
-			animation: google.maps.Animation.DROP,
-			icon: defaultIcon,
-			id: i
-		})
-		markers.push(marker);
-		bounds.extend(marker.position);
-		//onclick event for each
-		marker.addListener('click', function(){
-			populateInfoWindow(this, largeInfoWindow);
-		});
-		// Two event listeners - one for mouseover, one for mouseout,
-		// to change the colors back and forth.
-		marker.addListener('mouseover', function() {
-			this.setIcon(highlightedIcon);
-		});
-
-		marker.addListener('mouseout', function() {
-			this.setIcon(defaultIcon);
-		});
-	} // end for loop
-
-	map.fitBounds(bounds);
-
-} // end function
 
 function populateInfoWindow(marker, infowindow) {
 	//check to make sure not already open
@@ -155,7 +161,7 @@ function markerItem(name, lat, lng) {
 
 var json = $.getJSON("/js/dc_landmarks.json", function() {
 	var items = [];
-	var positions = []
+	
 	//populate everything for the list of landmarks
     for (var i = 0; i < 20; i++) {
 		name = json.responseJSON.features[i].properties.Name;
@@ -167,17 +173,17 @@ var json = $.getJSON("/js/dc_landmarks.json", function() {
         items.push(item);
         //set the initial map with all the features as markers
         position = new markerItem(name, lat, lng);
-        positions.push(position);  
+        markers.push(position);
     }
-    //set the initial map with all the features as markers
-    refreshMap(positions); 
 
     //create new LandmarkViewModel with the list
     ko.applyBindings(new LandmarkViewModel(items));
 }); //end json and initialize section
 
 var LandmarkViewModel = function(items) {
-	self = this;
+	//took out items passing in
+	var self = this;
+
     self.items = ko.observableArray(items);
     self.searchItem = ko.observable();
     self.doFilter = function() {
@@ -218,5 +224,46 @@ var LandmarkViewModel = function(items) {
     	var mkr = {title: name, location: {lng: lng, lat: lat}};
     	return mkr;
     }  //end makeMarker function
+
+    function refreshMap(positions) {
+    	var markers = [];
+		console.log(positions[0].title); // works!
+		var locations = positions
+		var bounds = new google.maps.LatLngBounds();
+		var largeInfoWindow = new google.maps.InfoWindow();
+	    var defaultIcon = makeMarkerIcon("E60000");
+		var highlightedIcon = makeMarkerIcon("FFB3B3");
+		for  (var i=0; i < locations.length; i++) {
+			var position = locations[i].location;
+			var title = locations[i].title;
+			//create a marker per location, and put into markers array
+			var marker = new google.maps.Marker({
+				map: map,
+				position: position,
+				title: title,
+				animation: google.maps.Animation.DROP,
+				icon: defaultIcon,
+				id: i
+			})
+			markers.push(marker);
+			bounds.extend(marker.position);
+			//onclick event for each
+			marker.addListener('click', function(){
+				populateInfoWindow(this, largeInfoWindow);
+			});
+			// Two event listeners - one for mouseover, one for mouseout,
+			// to change the colors back and forth.
+			marker.addListener('mouseover', function() {
+				this.setIcon(highlightedIcon);
+			});
+
+			marker.addListener('mouseout', function() {
+				this.setIcon(defaultIcon);
+			});
+		} // end for loop
+
+		map.fitBounds(bounds);
+
+	} // end function
 
 };  // end of model
