@@ -57,7 +57,15 @@ function initMap() {
 	infowin = new google.maps.InfoWindow(); //global
 	ko.applyBindings(new LandmarkViewModel()); 
 }
-	
+
+var listView = {
+	 init: function() {
+        // store pointers to our DOM elements for easy access later
+        this.listItem = document.getElementById("lmk").onclick = function() {
+    		console.log("eureka!")
+		}
+	}
+}
 
 
 
@@ -76,16 +84,28 @@ function landmarkItem(name, address, lat, lng) {
     // self.name = name;
     self.name = ko.observable(name); //per Nick
     // when name gets clicked, make the map marker jump
+
+    //TODO
+    // var p = self.name;
+    // p.addListener('click', function() {
+    // 	console.log("something is happening");   
+    // 	//needs to call something in external function??     
+    // });
+    
+
+
     // self.address = address;
     self.address = ko.observable(address); //per Nick
     // parts for Google Maps (not ko.observables)
+    
+    listView.init(); //adds click event to anchor - doesn't work
+
+
     self.title = name;
     self.location = {lng: lng, lat: lat};
 
 	//--------------markers-------------------------------
 
-	
-    // self.defaultIcon =  makeMarkerIcon("E60000");
     var defaultIcon =  makeMarkerIcon("E60000");
     var highlightedIcon = makeMarkerIcon("FFB3B3");
 
@@ -106,39 +126,16 @@ function landmarkItem(name, address, lat, lng) {
 		title: name,
 		animation: google.maps.Animation.DROP,
 		icon: defaultIcon,
-		//id: i
 		highlight: highlightedIcon,
 		baseicon: defaultIcon
 	})
-    	
-	// self.largeInfoWindow = new google.maps.InfoWindow();
 
 	marker.addListener('click', function() {
-		//if one is already open, close it
-		// TODO
-		// if (self.largeInfoWindow.marker = marker){
-		// 	console.log("window already open")
-		// }
-		// .setMap(null) // removes overlay
-		// if (map.infowindow) {
-		// 	//map.infowindow.close();
-		// 	console.log("window open");
-		// }
-
 		if (infowin.marker != marker) {
     		infowin.marker = marker;
     		infowin.setContent('<div>' + marker.title + '</div>');
     		infowin.open(map, marker);
     	} 
-	
-
-		// if (self.largeInfoWindow.marker != marker) {
-  //   		self.largeInfoWindow.marker = marker;
-  //   		self.largeInfoWindow.setContent('<div>' + marker.title + '</div>');
-  //   		self.largeInfoWindow.open(map, marker);
-  //   	} 
-
-
 	});
 
 	marker.addListener('mouseover', function() {
@@ -153,10 +150,6 @@ function landmarkItem(name, address, lat, lng) {
     
     var bounds = new google.maps.LatLngBounds();
 	bounds.extend(marker.position);
-
- 	
-	
-    	
     
  	//map.fitBounds(bounds); //only goes to last marker TODO
 
@@ -164,7 +157,7 @@ function landmarkItem(name, address, lat, lng) {
 
 
 
-    // populate infowindow should go here too, etc.
+   
  
     // call to external third API happens here
     // for each landmark item, call to external API and response
@@ -200,6 +193,7 @@ var LandmarkViewModel = function() {
     }
 
     self.searchItem = ko.observable();
+
     self.doFilter = function() {
         var filter = self.searchItem();  // Read the current value
         if(!filter) {
@@ -243,7 +237,15 @@ var LandmarkViewModel = function() {
 
         }  // end else 
     };  // end of doFilter function
-	
+
+    //(taken from forum:
+    //https://discussions.udacity.com/t/triggering-marker-bounce-w-list-binding/41089/11)
+	bounceUp = function(place) {
+    	//console.log(place.marker);
+    	google.maps.event.trigger(place.marker, 'click');
+    	// get it to bounce - TODO  https://developers.google.com/maps/documentation/javascript/examples/marker-animations
+    	
+ 	}
 
 };  // end of LandmarkViewModel
 
