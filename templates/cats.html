@@ -10,8 +10,9 @@
     <link type="text/css" rel="stylesheet" href="/css/bootstrap.min.css">
 	<script src="/js/knockout-3.4.2.js"></script>
 	<!-- custom js -->
-	<script src="/js/neighborhoodmap.js"></script>
-	<script src="/js/style.js"></script>
+    <script src="/js/style.js"></script>
+	
+	
 	<link type="text/css" rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -36,9 +37,9 @@
     		<div class="list container" id="list">
        
                 <div class="list-group" data-bind="foreach: items">
-                    <a href="#" class="list-group-item">
-                      <h5 class="list-group-item-heading" data-bind="text: name"></h5>
-                      <h6 class="list-group-item-text" data-bind="text: address"></h6>
+                    <a href="#" class="list-group-item" id="lmk" >
+                      <h5 class="list-group-item-heading" data-bind="visible: isVisible, text: name, click: bounceUp"></h5>
+                      <h6 class="list-group-item-text" data-bind="visible: isVisible, text: address, click: bounceUp"></h6>
                     </a>
                 </div>
 
@@ -55,7 +56,7 @@
 	</div>
 </main>
 
-
+<script src="/js/neighborhoodmap.js"></script>
 <!--API call to Google Maps-->
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBXcgHyvjUBGyfoyiNqTTw94-CgbAFypRg&callback=initMap"
 async defer></script>
