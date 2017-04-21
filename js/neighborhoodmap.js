@@ -40,14 +40,16 @@ var mapList = () //video 30
 
 //global variables to manage map and markers
 var map;
-var markers = [];
+var markers = []; //not used
 var json = $.getJSON("/js/dc_landmarks.json");
-var infowin;
+var infowin; // to make sure closed - not used?
+var curMarker; // to delete highlight
+var bounds;
 
 //initial start for map
 function initMap() {
 	//create style array
-	var styles = getStyleArray()
+	var styles = getStyleArray();
 	// Create a map object and specify the DOM element for display.
 	map = new google.maps.Map(document.getElementById('map'), {
 		styles: styles
@@ -55,52 +57,18 @@ function initMap() {
 	map.setCenter({lat: 38.891248, lng: -77.036551});
 	map.setZoom(11);
 	infowin = new google.maps.InfoWindow(); //global
+	bounds = new google.maps.LatLngBounds(); //global
 	ko.applyBindings(new LandmarkViewModel()); 
 }
 
-var listView = {
-	 init: function() {
-        // store pointers to our DOM elements for easy access later
-        this.listItem = document.getElementById("lmk").onclick = function() {
-    		console.log("eureka!")
-		}
-	}
-}
-
-
-
-// function populateInfoWindow(marker, infowindow) {
-// 	//check to make sure not already open
-// 	if (infowindow.marker != marker) {
-// 		infowindow.marker = marker;
-// 		infowindow.setContent('<div>' + marker.title + '</div>');
-// 		infowindow.open(map, marker);
-// 	}
-// }
 
 // Class to represent a list and marker
 function landmarkItem(name, address, lat, lng) {
     var self = this;
-    // self.name = name;
-    self.name = ko.observable(name); //per Nick
-    // when name gets clicked, make the map marker jump
-
-    //TODO
-    // var p = self.name;
-    // p.addListener('click', function() {
-    // 	console.log("something is happening");   
-    // 	//needs to call something in external function??     
-    // });
-    
-
-
-    // self.address = address;
-    self.address = ko.observable(address); //per Nick
+    self.name = ko.observable(name); 
+    //self.address = ko.observable(address);
+    self.isVisible = ko.observable(true);  // used for visible binding
     // parts for Google Maps (not ko.observables)
-    
-    listView.init(); //adds click event to anchor - doesn't work
-
-
     self.title = name;
     self.location = {lng: lng, lat: lat};
 
@@ -131,6 +99,9 @@ function landmarkItem(name, address, lat, lng) {
 	})
 
 	marker.addListener('click', function() {
+		if (curMarker) {
+			curMarker.setIcon(curMarker.baseicon);
+		} //resets icon to red 
 		if (infowin.marker != marker) {
     		infowin.marker = marker;
     		infowin.setContent('<div>' + marker.title + '</div>');
@@ -148,24 +119,16 @@ function landmarkItem(name, address, lat, lng) {
 
 	self.marker = marker;
     
-    var bounds = new google.maps.LatLngBounds();
 	bounds.extend(marker.position);
     
- 	//map.fitBounds(bounds); //only goes to last marker TODO
+ 	map.fitBounds(bounds); 
 
 	//--------------end markers-------------------------------
 
-
-
-   
- 
+	// TODO
     // call to external third API happens here
     // for each landmark item, call to external API and response
     // stored here. (this will be a function)
-
-    // what happens on an item click - 
-    // animate click etc all happens in 
-    // model
 
 
     return self;
@@ -187,64 +150,67 @@ var LandmarkViewModel = function() {
         lng = json.responseJSON.features[i].geometry.coordinates[0][0];
         // list of items for list
         self.item = ko.observable(new landmarkItem(name, address, lat, lng));
-        //item = new landmarkItem(name, address, lat, lng);
         self.items.push(self.item);
         //console.log(self.items.length); //always saying 0
     }
 
     self.searchItem = ko.observable();
 
-    self.doFilter = function() {
+	self.doFilter = ko.computed(function() {
         var filter = self.searchItem();  // Read the current value
-        if(!filter) {
-        	alert("Please enter a search term.");
-        } else {
-        	var n = false;
-        	//console.log(self.items().length); //works use ()
-        	//gives total number but are all the same thing
-        	// for (var i = 0; i < self.items().length; i++) {
-        	// 	console.log(self.items()[i]);
-        	// }
-			var filteredItems = self.items().map(function(item) {
-				//now changes all 20 to the same thing (the last one)
-				
-        		//console.log(self.items().item.name)
-		    	n = self.item().title.includes(filter);
-		    	console.log(n);
+        var lmkItems = self.items();
+        var lcFilter;
+        var lcName;
+        
+        //initial list on load
+        if (filter === undefined) {
+        	return lmkItems;
+        }
 
-		    	// if (n) {
-		    	// 	filteredItems.push(items[i]);
-		    	// }  // end if
-		    // } // end for loop
-		    });
-		 // 	var filteredItems = ([]);
-			// self.items().forEach(function(item) {
-			// 	n = self.item().title.includes(filter);
-		 //    	console.log(n);
-			// 	//console.log(self.item().title);
-			// // });
-			// for (var i = 0; i < self.items().length; i++) {
-		 //        item = self.items()[i];
-		 //        console.log("name is " + item.title);
-		 //    }
-		    //var filteredItems = ([]);
-		    if (!filteredItems.length == 0) {
-        		self.items(filteredItems); //set the new data in items bind
-		    } else {
-		    	alert("That search term did not return any results.");
-		    }
+        //if chars are deleted, make everything show again
+        if (filter === "") {
+        	for (var i = 0; i < lmkItems.length; i++) {
+        		lmkItems[i]().isVisible(true);
+        		lmkItems[i]().marker.setVisible(true);
+        	}
+        	return lmkItems;
+        }
 
+        if (filter != "") {
+        	//for (var i = 0; i < lmkItems.length; i++) {
+    		for (var i = 0; i < lmkItems.length; i++) {
+        		lcName = lmkItems[i]().name().toLowerCase();
+	        	lcFilter = filter.toLowerCase();
+	        	n = lcName.includes(lcFilter);
+	        	if (n) {
+	        		// make the list item visible
+	        		lmkItems[i]().isVisible(true);
+	        		lmkItems[i]().marker.setVisible(true);
+	        	} else {
+	        		// make the list item invisible
+	        		lmkItems[i]().isVisible(false);
+	        		lmkItems[i]().marker.setVisible(false);
+	        	}
+        	}
+        	return lmkItems;
+        }
 
-        }  // end else 
-    };  // end of doFilter function
+    }); //end of doFilter function
 
-    //(taken from forum:
-    //https://discussions.udacity.com/t/triggering-marker-bounce-w-list-binding/41089/11)
+    //(some of bounceUp taken from forum)
 	bounceUp = function(place) {
-    	//console.log(place.marker);
+		//clear the last selected marker if it exists
+		if (curMarker) {
+			curMarker.setIcon(curMarker.baseicon);
+		}
+		//open infowindow on marker
     	google.maps.event.trigger(place.marker, 'click');
-    	// get it to bounce - TODO  https://developers.google.com/maps/documentation/javascript/examples/marker-animations
-    	
+    	// get it to bounce (don't like this, but it works)
+    	//place.marker.setAnimation(google.maps.Animation.BOUNCE);
+	    //setTimeout(function(){ place.marker.setAnimation(null); }, 750);
+	    //change marker to highlighted color
+	    place.marker.setIcon(place.marker.highlight);
+	    curMarker = place.marker;
  	}
 
 };  // end of LandmarkViewModel
