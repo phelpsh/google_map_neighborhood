@@ -25,7 +25,7 @@
 
 			<form>
               <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search" data-bind="value: searchItem">
+                <input type="text" class="form-control" placeholder="Search" data-bind="textInput: searchItem">
                 <div class="input-group-btn">
                   <button data-bind="click: doFilter">Search</button>
                     <!--i class="glyphicon glyphicon-search"></i-->
@@ -36,10 +36,10 @@
 
     		<div class="list container" id="list">
        
-                <div class="list-group" data-bind="foreach: items">
+                <div class="list-group" data-bind="foreach: doFilter">
                     <a href="#" class="list-group-item" id="lmk" >
                       <h5 class="list-group-item-heading" data-bind="visible: isVisible, text: name, click: bounceUp"></h5>
-                      <h6 class="list-group-item-text" data-bind="visible: isVisible, text: address, click: bounceUp"></h6>
+                      <!--h6 class="list-group-item-text" data-bind="text: address, click: bounceUp"></h6-->
                     </a>
                 </div>
 
