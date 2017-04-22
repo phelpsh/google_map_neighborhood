@@ -10,33 +10,7 @@ Inventory of Historic Sights". It contains the point locations
 and attributes of buildings, statues, bridges, forts, fountains, 
 & memorials of historical worth. 
 
-
-// example AJAX call to get external data
-$.getJSON(nytimesURL, function(data){
-	$nytHeaderElem.text()	
-	etc.etc.
-	//graceful handling
-	}).error(function(e){
-		$nytHeaderElem.text("New York Times can't be loaded");
-
-	});
-
-var ViewModel = function() {
-//list (observableArray)
-//map
-//create markers for map Creating your markers as a 
-//part of your ViewModel is allowed (and recommended).
-
-//filter option text input field (to filter list and map markers)
-
-}
-
-//AIzaSyBXcgHyvjUBGyfoyiNqTTw94-CgbAFypRg - google maps API key
-
-var mapList = () //video 30
-
-// ko.applyBindings(new ViewModel()); */
-
+//AIzaSyBXcgHyvjUBGyfoyiNqTTw94-CgbAFypRg - google maps API key */
 
 //global variables to manage map and markers
 var map;
@@ -95,8 +69,50 @@ function landmarkItem(name, address, lat, lng) {
 		animation: google.maps.Animation.DROP,
 		icon: defaultIcon,
 		highlight: highlightedIcon,
-		baseicon: defaultIcon
-	})
+		baseicon: defaultIcon,
+		address: address
+	});
+
+	var nameNS = name.replace(/ /g, "_"); //get rid of all the spaces for API call
+	//console.log(nameNS);
+	
+    $.ajax({
+        type: "GET",
+        url: "http://en.wikipedia.org/w/api.php?action=parse&format=json&prop=text&section=0&page=" + nameNS + "&callback=?",
+        contentType: "application/json; charset=utf-8",
+        async: false,
+        dataType: "json",
+        success: function (data, textStatus, jqXHR) {
+ 
+ 			//console.log(data.parse===undefined);
+ 			if (data.parse === undefined) {
+	 			marker.desc = "No Wikipedia data for this location.";
+ 			} else {
+ 				var markup = data.parse.text["*"];
+	            var blurb = $('<div></div>').html(markup);
+
+	 			// code borrowed from 
+	 			// http://www.9bitstudios.com/2014/03/getting-data-from-the-wikipedia-api-using-jquery/
+	            // remove links as they will not work
+	            blurb.find('a').each(function() { $(this).replaceWith($(this).html()); });
+	            // remove any references
+	            blurb.find('sup').remove();
+	            // remove cite error
+	            blurb.find('.mw-ext-cite-error').remove();
+	            // $('#article').html($(blurb).find('p'));
+	            var it = $(blurb.find('p')[0]);
+	            if (it[0].innerText === "Redirect to:") {
+	            	marker.desc = "No Wikipedia data for this location."
+	            } else {
+	            	marker.desc = it[0].innerText;
+	            }
+	            
+ 			} // end if statement
+        }, //end success function
+        error: function (errorMessage) {
+        	marker.desc = "No Wikipedia data available at this time."
+        }
+    }); // end ajax call
 
 	marker.addListener('click', function() {
 		if (curMarker) {
@@ -104,7 +120,15 @@ function landmarkItem(name, address, lat, lng) {
 		} //resets icon to red 
 		if (infowin.marker != marker) {
     		infowin.marker = marker;
-    		infowin.setContent('<div>' + marker.title + '</div>');
+    		var winTitle = '<div class="window-head">' + marker.title + '</div>';
+    		var winAddress = '<div>' + marker.address + '</div>';
+    		var winDesc = '<div class="underlined">Data from Wikipedia:</div><div>' + marker.desc + '</div>';
+    		var winContent = winTitle + winAddress + winDesc;
+    		infowin.setContent(winContent);
+
+    		// infowin.setContent('<div>' + marker.title + '</div><div>' + 
+    		// marker.address + '</div><div>' + marker.desc + '</div>');
+
     		infowin.open(map, marker);
     	} 
 	});
@@ -123,17 +147,9 @@ function landmarkItem(name, address, lat, lng) {
     
  	map.fitBounds(bounds); 
 
-	//--------------end markers-------------------------------
-
-	// TODO
-    // call to external third API happens here
-    // for each landmark item, call to external API and response
-    // stored here. (this will be a function)
-
-
     return self;
 
-}
+} // end function landmark item
 
 
 var LandmarkViewModel = function() {
@@ -165,7 +181,7 @@ var LandmarkViewModel = function() {
         //initial list on load
         if (filter === undefined) {
         	return lmkItems;
-        }
+        } // end of it initiation filter
 
         //if chars are deleted, make everything show again
         if (filter === "") {
@@ -174,7 +190,7 @@ var LandmarkViewModel = function() {
         		lmkItems[i]().marker.setVisible(true);
         	}
         	return lmkItems;
-        }
+        } // end of if for blank filter
 
         if (filter != "") {
         	//for (var i = 0; i < lmkItems.length; i++) {
@@ -193,7 +209,7 @@ var LandmarkViewModel = function() {
 	        	}
         	}
         	return lmkItems;
-        }
+        } // end of if filter != ""
 
     }); //end of doFilter function
 
