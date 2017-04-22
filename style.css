@@ -1,0 +1,97 @@
+/* style.css */
+
+
+h1 {
+    text-transform: uppercase;
+    font-size: 25px;
+    padding-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #000000;
+}
+
+html, body { height: 100%; margin: 0; padding: 0; }
+
+#map { height: 100%; }
+
+a:hover {
+    text-decoration: none;
+}
+
+.map-big {
+    height: 400px;
+    width: 650px;
+}
+
+.list-div {
+    margin-top: 10px;
+}
+
+.list-item-name {
+    color: blue;
+    margin: 0 0 0 0px;
+}
+
+.list-item {
+    color: red;
+    margin-top: 0px;
+}
+
+.set-max {
+    max-width: 960px;
+}
+
+.vertical-align {
+    display: flex;
+    align-items: center;
+}
+
+.logo-item {
+    max-height: 70px;
+}
+
+/* Content tweaks */
+
+.img-row {
+    max-height: 550px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.center-image {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.text-desc {
+    text-align: center;
+    font-weight: normal;
+    font-size: 12px;
+    margin-bottom: 20px;
+}
+
+.work-title {
+    margin-top: 15px;
+    margin-bottom: 0;
+}
+
+.underlined {
+    margin-top: 10px;
+    text-decoration: underline;
+}
+
+.window-head {
+    font-size: 14px;
+    font-weight: bold;
+}
+/* Responsive */
+
+@media screen and (max-width: 768px) {
+    h1 { font-size: 32px; }
+    h2 {text-align: center;}
+}
+
+@media screen and (max-width: 450px) {
+    h1 { font-size: 28px; }
+}
+
