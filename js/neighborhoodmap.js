@@ -90,7 +90,6 @@ function landmarkItem(name, address, lat, lng) {
  			} else {
  				var markup = data.parse.text["*"];
 	            var blurb = $('<div></div>').html(markup);
-
 	 			// code borrowed from 
 	 			// http://www.9bitstudios.com/2014/03/getting-data-from-the-wikipedia-api-using-jquery/
 	            // remove links as they will not work
