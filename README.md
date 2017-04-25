@@ -5,7 +5,7 @@ This one-page map application reads from a geoJSON file and uses the Google Maps
 ## Quickstart:
 
 + Copy the app.yaml and neighborhood.py to the local drive
-+ Copy the css, js, and templates folders to the same directory
++ Copy the css, js, and templates folders to the same directory as the app.yaml file
 + Launch the application by using dev_appserver.py app.yaml command from terminal inside of the application's folder to start the web server
 + Navigate to the local web server browser (i.e. http://localhost:8080/) to view the application.
 
