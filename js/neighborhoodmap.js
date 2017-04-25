@@ -110,7 +110,7 @@ function landmarkItem(name, address, lat, lng) {
         }, //end success function
         error: function (errorMessage) {
         	marker.desc = "No Wikipedia data available at this time."
-        }
+        } // end error function
     }); // end ajax call
 
 	marker.addListener('click', function() {
@@ -129,8 +129,8 @@ function landmarkItem(name, address, lat, lng) {
     		// marker.address + '</div><div>' + marker.desc + '</div>');
 
     		infowin.open(map, marker);
-    	} 
-	});
+    	} // end if 
+	}); // end function
 
 	marker.addListener('mouseover', function() {
 		marker.setIcon(marker.highlight);
@@ -167,7 +167,7 @@ var LandmarkViewModel = function() {
         self.item = ko.observable(new landmarkItem(name, address, lat, lng));
         self.items.push(self.item);
         //console.log(self.items.length); //always saying 0
-    }
+    } // end for
 
     self.searchItem = ko.observable();
 
@@ -228,5 +228,5 @@ var LandmarkViewModel = function() {
 	    curMarker = place.marker;
  	}
 
-};  // end of LandmarkViewModel
+} // end of LandmarkViewModel
 
