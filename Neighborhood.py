@@ -38,12 +38,20 @@ class Handler(webapp2.RequestHandler):
 
 class MainPage(Handler):
     def render_front(self):
-        self.render('index_map.html')
+        self.render('cats.html')
 
     def get(self):
         self.render_front()
         # self.response.write("hello world")
 
+
+class CatPage(Handler):
+    def render_front(self):
+        self.render('cats.html')
+
+    def get(self):
+        self.render_front()
+        # self.response.write("hello world")
 
 ############################################
 # End display initial blog page
@@ -55,5 +63,6 @@ class MainPage(Handler):
 
 
 app = webapp2.WSGIApplication([('/', MainPage),
+                              ('/cats/', CatPage),
                                ],
                               debug=True)
