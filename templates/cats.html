@@ -31,13 +31,14 @@
                 </form>
             </div>
 
-    		<div class="list container wrap-it" id="list">
-                <div class="list-group wrap-it" data-bind="foreach: doFilter">
-                    <a href="#" class="list-group-item wrap-it" id="lmk">
+    		<div id="list">
+                <ul class="list-unstyled wrap-it" data-bind="foreach: doFilter">
+                    <li><a href="#" class="list-group-item wrap-it" id="lmk">
                         <h5 class="list-group-item-heading wrap-it" data-bind="visible: isVisible, text: name, click: bounceUp"></h5>
-                    </a>
-                </div>
+                    </a></li>
+                </ul>
             </div>
+
 		</div>
 
 		<div class="map-big col-sm-9">
