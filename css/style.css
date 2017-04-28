@@ -10,9 +10,11 @@ h1 {
     color: #000000;
 }
 
+/*from Google maps documentation*/
 html, body { height: 100%; margin: 0; padding: 0; }
 
 #map { height: 100%; }
+/*end from maps documentation */
 
 a:hover {
     text-decoration: none;
@@ -21,6 +23,9 @@ a:hover {
 .map-big {
     height: 400px;
     width: 650px;
+    margin-top: 10px;
+    /*border-style: solid;*/
+    /*border-color: red;*/
 }
 
 .list-div {
@@ -84,6 +89,12 @@ a:hover {
     font-size: 14px;
     font-weight: bold;
 }
+
+.wrap-it { 
+    overflow-wrap: break-word; 
+}
+
+
 /* Responsive */
 
 @media screen and (max-width: 768px) {
