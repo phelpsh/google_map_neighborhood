@@ -15,7 +15,7 @@ and attributes of buildings, statues, bridges, forts, fountains,
 //global variables to manage map and markers
 var map;
 var markers = []; //not used
-var json = $.getJSON("/js/dc_landmarks.json");
+var json; //= $.getJSON("/js/dc_landmarks.json");
 var infowin; // to make sure closed - not used?
 var curMarker; // to delete highlight
 var bounds;
@@ -155,19 +155,28 @@ var LandmarkViewModel = function() {
 	
 	var self = this;
     self.items = ko.observableArray(); 
+
+    $.getJSON("/js/dc_landmarks.json", function(json) {
+    	for (var i = 0; i < 20; i++) {
+			
+			name = json.features[i].properties.Name;
+	        address = json.features[i].properties.ADDRESS;
+	        lat = json.features[i].geometry.coordinates[0][1];
+	        lng = json.features[i].geometry.coordinates[0][0];
+	        //list of items for list
+	        self.item = ko.observable(new landmarkItem(name, address, lat, lng));
+	        self.items.push(self.item);
+	    } // end for
+	});
+
+	// start hack ---------------------------------
+
+
 	
-	//populate everything for the list of landmarks
-	//using the global json object created in initMap()
-    for (var i = 0; i < 20; i++) {
-		name = json.responseJSON.features[i].properties.Name;
-        address = json.responseJSON.features[i].properties.ADDRESS;
-        lat = json.responseJSON.features[i].geometry.coordinates[0][1];
-        lng = json.responseJSON.features[i].geometry.coordinates[0][0];
-        // list of items for list
-        self.item = ko.observable(new landmarkItem(name, address, lat, lng));
-        self.items.push(self.item);
-        //console.log(self.items.length); //always saying 0
-    } // end for
+
+
+
+	//----------end of hard coding data ----------
 
     self.searchItem = ko.observable();
 
