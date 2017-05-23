@@ -20,14 +20,21 @@ var infowin; // to make sure closed - not used?
 var curMarker; // to delete highlight
 var bounds;
 
+function mapError() {
+	alert("Google Maps is not currently available");
+}
+
 //initial start for map
 function initMap() {
+	
 	//create style array
 	var styles = getStyleArray();
 	// Create a map object and specify the DOM element for display.
+	
 	map = new google.maps.Map(document.getElementById('map'), {
 		styles: styles
 	}); //global
+	
 	map.setCenter({lat: 38.891248, lng: -77.036551});
 	map.setZoom(11);
 	infowin = new google.maps.InfoWindow(); //global
@@ -39,6 +46,7 @@ function initMap() {
 // Class to represent a list and marker
 function landmarkItem(name, address, lat, lng) {
     var self = this;
+
     self.name = ko.observable(name); 
     //self.address = ko.observable(address);
     self.isVisible = ko.observable(true);  // used for visible binding
@@ -156,27 +164,42 @@ var LandmarkViewModel = function() {
 	var self = this;
     self.items = ko.observableArray(); 
 
-    $.getJSON("/js/dc_landmarks.json", function(json) {
-    	for (var i = 0; i < 20; i++) {
+ //    $.getJSON("/js/dc_landmarks.json", function(json) {
+ //    	for (var i = 0; i < 20; i++) {
 			
-			name = json.features[i].properties.Name;
-	        address = json.features[i].properties.ADDRESS;
-	        lat = json.features[i].geometry.coordinates[0][1];
-	        lng = json.features[i].geometry.coordinates[0][0];
-	        //list of items for list
-	        self.item = ko.observable(new landmarkItem(name, address, lat, lng));
-	        self.items.push(self.item);
-	    } // end for
-	});
+	// 		name = json.features[i].properties.Name;
+	//         address = json.features[i].properties.ADDRESS;
+	//         lat = json.features[i].geometry.coordinates[0][1];
+	//         lng = json.features[i].geometry.coordinates[0][0];
+	//         //list of items for list
+	//         self.item = ko.observable(new landmarkItem(name, address, lat, lng));
+	//         self.items.push(self.item);
+	//     } // end for
+	// });
 
-	// start hack ---------------------------------
+	   $.getJSON("/js/dc_landmarks.json")
+	   		.done(function(json) {
+		    	for (var i = 0; i < 20; i++) {
+					
+					name = json.features[i].properties.Name;
+			        address = json.features[i].properties.ADDRESS;
+			        lat = json.features[i].geometry.coordinates[0][1];
+			        lng = json.features[i].geometry.coordinates[0][0];
+			        //list of items for list
+			        self.item = ko.observable(new landmarkItem(name, address, lat, lng));
+			        self.items.push(self.item);
+			    } // end for
+			})
+			.fail(function() { 
+			    console.log("no items"); // works
+			    // needs to stop drawing because there's no data.
+			    // display an error webpage with a blank google map 
+			    //self.item = ko.observable(new landmarkItem());
+		        //self.items.push(self.item);
+		        //write to div id=list????? HOOOCH - "No data found."
+		        $( "#list" ).append( "<ul><li>Error requesting file, no items to display</li></ul>");
+			});
 
-
-	
-
-
-
-	//----------end of hard coding data ----------
 
     self.searchItem = ko.observable();
 
@@ -228,10 +251,10 @@ var LandmarkViewModel = function() {
 			curMarker.setIcon(curMarker.baseicon);
 		}
 		//open infowindow on marker
-    	google.maps.event.trigger(place.marker, 'click');
+    	//google.maps.event.trigger(place.marker, 'click');
     	// get it to bounce (don't like this, but it works)
-    	//place.marker.setAnimation(google.maps.Animation.BOUNCE);
-	    //setTimeout(function(){ place.marker.setAnimation(null); }, 750);
+    	place.marker.setAnimation(google.maps.Animation.BOUNCE);
+	    setTimeout(function(){ place.marker.setAnimation(null); }, 750);
 	    //change marker to highlighted color
 	    place.marker.setIcon(place.marker.highlight);
 	    curMarker = place.marker;
