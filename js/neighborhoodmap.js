@@ -135,18 +135,20 @@ function landmarkItem(name, address, lat, lng) {
 
     		// infowin.setContent('<div>' + marker.title + '</div><div>' + 
     		// marker.address + '</div><div>' + marker.desc + '</div>');
+    		marker.setIcon(marker.highlight);
+			curMarker = marker;
 
     		infowin.open(map, marker);
     	} // end if 
 	}); // end function
 
-	marker.addListener('mouseover', function() {
-		marker.setIcon(marker.highlight);
-	});
+	// marker.addListener('mouseover', function() {
+	// 	marker.setIcon(marker.highlight);
+	// });
 
-	marker.addListener('mouseout', function() {
-		marker.setIcon(marker.baseicon);
-	}); 
+	// marker.addListener('mouseout', function() {
+	// 	marker.setIcon(marker.baseicon);
+	// }); 
 
 	self.marker = marker;
     
@@ -251,10 +253,10 @@ var LandmarkViewModel = function() {
 			curMarker.setIcon(curMarker.baseicon);
 		}
 		//open infowindow on marker
-    	//google.maps.event.trigger(place.marker, 'click');
+    	google.maps.event.trigger(place.marker, 'click');
     	// get it to bounce (don't like this, but it works)
-    	place.marker.setAnimation(google.maps.Animation.BOUNCE);
-	    setTimeout(function(){ place.marker.setAnimation(null); }, 750);
+    	// place.marker.setAnimation(google.maps.Animation.BOUNCE);
+	    // setTimeout(function(){ place.marker.setAnimation(null); }, 750);
 	    //change marker to highlighted color
 	    place.marker.setIcon(place.marker.highlight);
 	    curMarker = place.marker;
