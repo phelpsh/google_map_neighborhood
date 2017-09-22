@@ -10,8 +10,6 @@ Inventory of Historic Sights". It contains the point locations
 and attributes of buildings, statues, bridges, forts, fountains, 
 & memorials of historical worth. 
 
-//AIzaSyBXcgHyvjUBGyfoyiNqTTw94-CgbAFypRg - google maps API key */
-
 //global variables to manage map and markers
 var map;
 var markers = []; //not used
@@ -48,7 +46,6 @@ function landmarkItem(name, address, lat, lng) {
     var self = this;
 
     self.name = ko.observable(name); 
-    //self.address = ko.observable(address);
     self.isVisible = ko.observable(true);  // used for visible binding
     // parts for Google Maps (not ko.observables)
     self.title = name;
@@ -82,8 +79,7 @@ function landmarkItem(name, address, lat, lng) {
 	});
 
 	var nameNS = name.replace(/ /g, "_"); //get rid of all the spaces for API call
-	//console.log(nameNS);
-	
+		
     $.ajax({
         type: "GET",
         url: "http://en.wikipedia.org/w/api.php?action=parse&format=json&prop=text&section=0&page=" + nameNS + "&callback=?",
@@ -92,7 +88,6 @@ function landmarkItem(name, address, lat, lng) {
         dataType: "json",
         success: function (data, textStatus, jqXHR) {
  
- 			//console.log(data.parse===undefined);
  			if (data.parse === undefined) {
 	 			marker.desc = "No Wikipedia data for this location.";
  			} else {
@@ -133,22 +128,12 @@ function landmarkItem(name, address, lat, lng) {
     		var winContent = winTitle + winAddress + winDesc;
     		infowin.setContent(winContent);
 
-    		// infowin.setContent('<div>' + marker.title + '</div><div>' + 
-    		// marker.address + '</div><div>' + marker.desc + '</div>');
     		marker.setIcon(marker.highlight);
-			curMarker = marker;
+		curMarker = marker;
 
     		infowin.open(map, marker);
     	} // end if 
 	}); // end function
-
-	// marker.addListener('mouseover', function() {
-	// 	marker.setIcon(marker.highlight);
-	// });
-
-	// marker.addListener('mouseout', function() {
-	// 	marker.setIcon(marker.baseicon);
-	// }); 
 
 	self.marker = marker;
     
@@ -160,28 +145,14 @@ function landmarkItem(name, address, lat, lng) {
 
 } // end function landmark item
 
-
 var LandmarkViewModel = function() {
 	
 	var self = this;
-    self.items = ko.observableArray(); 
+    	self.items = ko.observableArray(); 
 
- //    $.getJSON("/js/dc_landmarks.json", function(json) {
- //    	for (var i = 0; i < 20; i++) {
-			
-	// 		name = json.features[i].properties.Name;
-	//         address = json.features[i].properties.ADDRESS;
-	//         lat = json.features[i].geometry.coordinates[0][1];
-	//         lng = json.features[i].geometry.coordinates[0][0];
-	//         //list of items for list
-	//         self.item = ko.observable(new landmarkItem(name, address, lat, lng));
-	//         self.items.push(self.item);
-	//     } // end for
-	// });
-
-	   $.getJSON("/js/dc_landmarks.json")
-	   		.done(function(json) {
-		    	for (var i = 0; i < 20; i++) {
+	$.getJSON("/js/dc_landmarks.json")
+	   .done(function(json) {
+		for (var i = 0; i < 20; i++) {
 					
 					name = json.features[i].properties.Name;
 			        address = json.features[i].properties.ADDRESS;
@@ -194,11 +165,7 @@ var LandmarkViewModel = function() {
 			})
 			.fail(function() { 
 			    console.log("no items"); // works
-			    // needs to stop drawing because there's no data.
-			    // display an error webpage with a blank google map 
-			    //self.item = ko.observable(new landmarkItem());
-		        //self.items.push(self.item);
-		        //write to div id=list????? HOOOCH - "No data found."
+			    
 		        $( "#list" ).append( "<ul><li>Error requesting file, no items to display</li></ul>");
 			});
 
@@ -226,8 +193,7 @@ var LandmarkViewModel = function() {
         } // end of if for blank filter
 
         if (filter != "") {
-        	//for (var i = 0; i < lmkItems.length; i++) {
-    		for (var i = 0; i < lmkItems.length; i++) {
+     		for (var i = 0; i < lmkItems.length; i++) {
         		lcName = lmkItems[i]().name().toLowerCase();
 	        	lcFilter = filter.toLowerCase();
 	        	n = lcName.includes(lcFilter);
@@ -253,11 +219,8 @@ var LandmarkViewModel = function() {
 			curMarker.setIcon(curMarker.baseicon);
 		}
 		//open infowindow on marker
-    	google.maps.event.trigger(place.marker, 'click');
-    	// get it to bounce (don't like this, but it works)
-    	// place.marker.setAnimation(google.maps.Animation.BOUNCE);
-	    // setTimeout(function(){ place.marker.setAnimation(null); }, 750);
-	    //change marker to highlighted color
+    		google.maps.event.trigger(place.marker, 'click');
+    	    //change marker to highlighted color
 	    place.marker.setIcon(place.marker.highlight);
 	    curMarker = place.marker;
  	}
