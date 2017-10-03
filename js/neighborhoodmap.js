@@ -8,7 +8,7 @@ collection of structures with historical significance within the
 District of Columbia as listed in the "District of Columbia 
 Inventory of Historic Sights". It contains the point locations 
 and attributes of buildings, statues, bridges, forts, fountains, 
-& memorials of historical worth. 
+& memorials of historical worth. */
 
 //global variables to manage map and markers
 var map;
